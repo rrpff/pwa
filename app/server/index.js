@@ -2,30 +2,52 @@ import path from 'path'
 import express from 'express'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
+import { createMemoryHistory } from 'history'
 import App from '../components/App'
+import routes from '../routes'
 
 const app = express()
 
 app.use(express.static(path.join(__dirname, '..', 'public')))
 
-app.get('/', function (req, res) {
-  const contents = renderToString(<App />)
+app.use(function (req, res) {
+  const history = createMemoryHistory({ initialEntries: [req.path] })
+  const match = routes.recognize(history.location.pathname)
+  if (!match) return res.status(404).send('404')
 
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <title>PWA React Example</title>
-      </head>
-      <body>
-        <div id="root">${contents}</div>
-        <script src="/assets/bundle.js"></script>
-      </body>
-    </html>
-  `)
+  const route = match[0]
+  const { get, name } = route.handler
+
+  get().then(Component => {
+    const contents = renderToString(
+      <App
+        routes={routes}
+        history={history}
+        initialComponent={Component}
+        initialParams={route.params}
+      />
+    )
+
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+          <title>PWA React Example</title>
+        </head>
+        <body>
+          <div id="root">${contents}</div>
+          <script>
+            window.initialComponentName = '${name}'
+            window.initialParams = ${JSON.stringify(route.params)}
+          </script>
+          <script src="/bundle.js"></script>
+        </body>
+      </html>
+    `)
+  })
 })
 
 app.listen(3000, () => {
