@@ -4,16 +4,18 @@ import { createBrowserHistory } from 'history'
 import App from '../components/App'
 import routes from '../routes'
 import getPage from '../pages'
+import manifest from '../manifest'
 
 const history = createBrowserHistory()
 const root = document.getElementById('root')
 
-getPage(window.initialComponentName).then(Component => {
+getPage(manifest, window.initialComponentName).then(({ component, dependencies }) => {
   const tree =
     <App
       history={history}
       routes={routes}
-      initialComponent={Component}
+      initialComponent={component}
+      initialDependencies={dependencies}
       initialParams={window.initialParams}
     />
 

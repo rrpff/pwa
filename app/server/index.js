@@ -18,13 +18,14 @@ app.use(function (req, res) {
   const route = match[0]
   const { get, name } = route.handler
 
-  get().then(Component => {
+  get().then(({ component, dependencies }) => {
     const contents = renderToString(
       <App
         routes={routes}
         history={history}
-        initialComponent={Component}
+        initialComponent={component}
         initialParams={route.params}
+        initialDependencies={dependencies}
       />
     )
 

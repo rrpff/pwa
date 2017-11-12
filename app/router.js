@@ -7,7 +7,11 @@ class Router extends React.Component {
 
     this.routes = props.routes
     this.history = props.history
-    this.state = { Component: this.props.initialComponent, params: this.props.initialParams }
+    this.state = {
+      component: this.props.initialComponent,
+      params: this.props.initialParams,
+      dependencies: this.props.initialDependencies
+    }
   }
 
   getChildContext () {
@@ -43,13 +47,16 @@ class Router extends React.Component {
     const route = match[0]
     const { get, name } = route.handler
 
-    get().then(Component => {
-      this.setState({ Component, params: route.params })
+    get().then(({ component, dependencies }) => {
+      this.setState({ component, dependencies, params: route.params })
     })
   }
 
   render () {
-    return React.createElement(this.state.Component, { params: this.state.params })
+    return React.createElement(this.state.component, {
+      params: this.state.params,
+      dependencies: this.state.dependencies
+    })
   }
 }
 

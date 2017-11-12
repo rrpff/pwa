@@ -1,9 +1,19 @@
 import React from 'react'
-import Sidebar from '../../components/Sidebar'
 
-export default (props) =>
-  <section>
-    <h1>Superman</h1>
-    <Sidebar />
-    <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/SupermanRoss.png" />
-  </section>
+export default class SupermanPage extends React.Component {
+  static dependencies = {
+    Sidebar: 'components/Sidebar'
+  }
+
+  render () {
+    const { Sidebar } = this.props.dependencies
+
+    return (
+      <section>
+        <h1>Superman</h1>
+        <Sidebar />
+        <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/SupermanRoss.png" />
+      </section>
+    )
+  }
+}
