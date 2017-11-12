@@ -8,6 +8,7 @@ import routes from '../routes'
 
 const app = express()
 
+app.use(express.static(path.join(__dirname, '..', 'bundles')))
 app.use(express.static(path.join(__dirname, '..', 'public')))
 
 app.use(function (req, res) {
@@ -44,7 +45,7 @@ app.use(function (req, res) {
             window.initialComponentName = '${name}'
             window.initialParams = ${JSON.stringify(route.params)}
           </script>
-          <script src="/bundle.js"></script>
+          <script src="/main.bundle.js"></script>
         </body>
       </html>
     `)
