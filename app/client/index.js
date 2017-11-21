@@ -1,6 +1,9 @@
 import React from 'react'
 import { hydrate } from 'react-dom'
 import { createBrowserHistory } from 'history'
+import { ApolloClient } from 'apollo-client'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import { HttpLink } from 'apollo-link-http'
 import App from '../components/App'
 import routes from '../routes'
 import getPage from '../pages'
@@ -9,7 +12,12 @@ import manifest from '../manifest'
 const history = createBrowserHistory()
 const root = document.getElementById('root')
 
-getPage(manifest, window.initialComponentName).then(({ component, dependencies }) => {
+const gqlClient = new ApolloClient({
+  link: new HttpLink({ uri: '/graphql' }),
+  cache: new InMemoryCache()
+})
+
+getPage(gqlClient, manifest, window.initialComponentName).then(({ component, dependencies }) => {
   const tree =
     <App
       history={history}
@@ -17,6 +25,8 @@ getPage(manifest, window.initialComponentName).then(({ component, dependencies }
       initialComponent={component}
       initialDependencies={dependencies}
       initialParams={window.initialParams}
+      initialData={window.initialData}
+      gqlClient={gqlClient}
     />
 
   hydrate(tree, root)

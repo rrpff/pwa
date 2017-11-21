@@ -1,10 +1,22 @@
 import React from 'react'
 import Link from '../../link'
 
-export default () =>
+export default ({ superheroes }) =>
   <ul>
-    <li style={{ color: 'red' }}><Link href="/">Home</Link></li>
-    <li style={{ color: 'red' }}><Link href="/batman">Batman</Link></li>
-    <li style={{ color: 'red' }}><Link href="/superman">Superman</Link></li>
-    <li style={{ color: 'red' }}><Link href="/wonderwoman">Wonder Woman</Link></li>
+    <li key="home" style={{ color: 'red' }}>
+      <Link href="/">
+        <strong>
+          Home
+        </strong>
+      </Link>
+    </li>
+    {superheroes.map(superhero =>
+      <li style={{ color: 'red' }} key={superhero.name}>
+        <Link href={`/${superhero.slug}`}>
+          <strong>
+            {superhero.name}
+          </strong>
+        </Link>
+      </li>
+    )}
   </ul>

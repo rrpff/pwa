@@ -1,7 +1,7 @@
 const invertHash = (hash) =>
   Object.keys(hash).reduce((acc, key) => Object.assign({}, acc, { [hash[key]]: key }), {})
 
-export default function getPage (manifest, pageName) {
+export default function getPage (gqlClient, manifest, pageName) {
   return import(`./${pageName}`)
     .then(mod => mod.default)
     .then(component => {
@@ -16,6 +16,11 @@ export default function getPage (manifest, pageName) {
         }, {})
 
         return { component, dependencies }
+      }).then(({ component, dependencies }) => {
+        if (!component.query) return { component, dependencies, data: {} }
+        return component.query(gqlClient).then(({ data }) => {
+          return { component, dependencies, data }
+        })
       })
     })
 }

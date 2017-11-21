@@ -3,7 +3,8 @@ const urlsToCache = [
   '/main.bundle.js'
 ]
 
-const shouldSkipCache = response => !response || response.status !== 200 || response.type !== 'basic'
+const shouldSkipCache = (request, response) =>
+  !response || response.status !== 200 || response.type !== 'basic' || request.method !== 'GET'
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
@@ -19,7 +20,7 @@ self.addEventListener('fetch', function (event) {
       const fetchRequest = event.request.clone()
 
       return fetch(fetchRequest).then(response => {
-        if (shouldSkipCache(response)) return response
+        if (shouldSkipCache(event.request, response)) return response
         const responseToCache = response.clone()
 
         caches.open(CACHE_NAME).then(cache =>

@@ -10,7 +10,9 @@ class Router extends React.Component {
     this.state = {
       component: this.props.initialComponent,
       params: this.props.initialParams,
-      dependencies: this.props.initialDependencies
+      dependencies: this.props.initialDependencies,
+      data: this.props.initialData,
+      gqlClient: this.props.gqlClient
     }
   }
 
@@ -47,15 +49,16 @@ class Router extends React.Component {
     const route = match[0]
     const { get, name } = route.handler
 
-    get().then(({ component, dependencies }) => {
-      this.setState({ component, dependencies, params: route.params })
+    get(this.state.gqlClient).then(({ component, dependencies, data }) => {
+      this.setState({ component, dependencies, data, params: route.params })
     })
   }
 
   render () {
     return React.createElement(this.state.component, {
       params: this.state.params,
-      dependencies: this.state.dependencies
+      dependencies: this.state.dependencies,
+      data: this.state.data
     })
   }
 }

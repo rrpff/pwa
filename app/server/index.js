@@ -1,15 +1,59 @@
 import path from 'path'
 import express from 'express'
+import graphqlHTTP from 'express-graphql'
+import { buildSchema } from 'graphql'
+import { ApolloClient } from 'apollo-client'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import gql from 'graphql-tag'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { createMemoryHistory } from 'history'
+import LocalLink from './graphql/ApolloLocalLink'
 import App from '../components/App'
 import routes from '../routes'
+
+const store = {
+  superheroes: [
+    { name: 'Batman', powers: ['Conviction', 'Intelligence'], slug: 'batman' },
+    { name: 'Wonder Woman', powers: ['Super Strength', 'Invisible Jet'], slug: 'wonder-woman' },
+    { name: 'Superman', powers: ['Flight', 'Super Strength'], slug: 'superman' }
+  ]
+}
+
+const schema = buildSchema(`
+  type Query {
+    superheroes: [Superhero],
+    superhero(name: String!): Superhero
+  }
+
+  type Superhero {
+    name: String,
+    slug: String,
+    powers: [String]
+  }
+`)
+
+const root = {
+  superheroes: () => store.superheroes,
+  superhero: ({ name }) => store.superheroes.find(s => s.name === name)
+}
+
+const gqlClient = new ApolloClient({
+  ssrMode: true,
+  link: new LocalLink(schema, {}, root),
+  cache: new InMemoryCache()
+})
 
 const app = express()
 
 app.use(express.static(path.join(__dirname, '..', 'bundles')))
 app.use(express.static(path.join(__dirname, '..', 'public')))
+
+app.use('/graphql', graphqlHTTP({
+  schema: schema,
+  rootValue: root,
+  graphiql: true
+}))
 
 app.use(function (req, res) {
   const history = createMemoryHistory({ initialEntries: [req.path] })
@@ -19,7 +63,7 @@ app.use(function (req, res) {
   const route = match[0]
   const { get, name } = route.handler
 
-  get().then(({ component, dependencies }) => {
+  get(gqlClient).then(({ component, dependencies, data }) => {
     const contents = renderToString(
       <App
         routes={routes}
@@ -27,6 +71,7 @@ app.use(function (req, res) {
         initialComponent={component}
         initialParams={route.params}
         initialDependencies={dependencies}
+        initialData={data}
       />
     )
 
@@ -44,6 +89,7 @@ app.use(function (req, res) {
           <script>
             window.initialComponentName = '${name}'
             window.initialParams = ${JSON.stringify(route.params)}
+            window.initialData = ${JSON.stringify(data)}
           </script>
           <script src="/main.bundle.js"></script>
         </body>
