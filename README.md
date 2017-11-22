@@ -13,7 +13,7 @@ _It's not supposed to be any good yet._
 - [x] Dependency injection for components
 - [x] Service worker caching
 - [x] Retrieve data when rendering pages
-- [ ] Retrieve data using props when rendering pages
+- [x] Retrieve data using props when rendering pages
 - [ ] Use [workbox](https://developers.google.com/web/tools/workbox/overview)
 - [ ] Figure out a better way of fetching data for rendering. Embedding queries in components is pretty lame.
 - [ ] Handle UI and network events changing state (probably redux + sagas, but blue sky thinking needed here.)

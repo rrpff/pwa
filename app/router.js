@@ -34,7 +34,6 @@ class Router extends React.Component {
   }
 
   componentDidMount () {
-    this.updateRenderedLocation(this.history.location)
     this.unlisten = this.history.listen(location => {
       this.updateRenderedLocation(this.history.location)
     })
@@ -49,7 +48,7 @@ class Router extends React.Component {
     const route = match[0]
     const { get, name } = route.handler
 
-    get(this.state.gqlClient).then(({ component, dependencies, data }) => {
+    get(this.state.gqlClient, route.params).then(({ component, dependencies, data }) => {
       this.setState({ component, dependencies, data, params: route.params })
     })
   }

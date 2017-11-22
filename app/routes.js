@@ -4,9 +4,7 @@ import manifest from './manifest'
 
 const routes = new RouteRecognizer()
 
-routes.add([{ path: '/', handler: { name: 'HomePage', get: (gqlClient) => getPage(gqlClient, manifest, 'HomePage') } }])
-routes.add([{ path: '/batman', handler: { name: 'BatmanPage', get: (gqlClient) => getPage(gqlClient, manifest, 'BatmanPage') } }])
-routes.add([{ path: '/superman', handler: { name: 'SupermanPage', get: (gqlClient) => getPage(gqlClient, manifest, 'SupermanPage') } }])
-routes.add([{ path: '/wonder-woman', handler: { name: 'WonderWomanPage', get: (gqlClient) => getPage(gqlClient, manifest, 'WonderWomanPage') } }])
+routes.add([{ path: '/', handler: { name: 'HomePage', get: (gqlClient, params) => getPage(gqlClient, manifest, 'HomePage', params) } }])
+routes.add([{ path: '/posts/:slug', handler: { name: 'PostPage', get: (gqlClient, params) => getPage(gqlClient, manifest, 'PostPage', params) } }])
 
 export default routes

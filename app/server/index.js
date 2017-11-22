@@ -1,4 +1,6 @@
 import path from 'path'
+import fs from 'fs'
+import { promisify } from 'util'
 import express from 'express'
 import graphqlHTTP from 'express-graphql'
 import { buildSchema } from 'graphql'
@@ -8,34 +10,45 @@ import gql from 'graphql-tag'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { createMemoryHistory } from 'history'
+import marked from 'marked'
 import LocalLink from './graphql/ApolloLocalLink'
 import App from '../components/App'
 import routes from '../routes'
 
+const readFileAsync = promisify(fs.readFile)
+
 const store = {
-  superheroes: [
-    { name: 'Batman', powers: ['Conviction', 'Intelligence'], slug: 'batman' },
-    { name: 'Wonder Woman', powers: ['Super Strength', 'Invisible Jet'], slug: 'wonder-woman' },
-    { name: 'Superman', powers: ['Flight', 'Super Strength'], slug: 'superman' }
+  posts: [
+    {
+      slug: 'pwa-react',
+      title: 'Building a Progressive Web App with React',
+      file: path.join(__dirname, '..', '..', 'posts', 'pwa-react.md')
+    }
   ]
 }
 
 const schema = buildSchema(`
   type Query {
-    superheroes: [Superhero],
-    superhero(name: String!): Superhero
+    posts: [Post],
+    post(slug: String!): Post
   }
 
-  type Superhero {
-    name: String,
+  type Post {
     slug: String,
-    powers: [String]
+    title: String,
+    html: String
   }
 `)
 
 const root = {
-  superheroes: () => store.superheroes,
-  superhero: ({ name }) => store.superheroes.find(s => s.name === name)
+  posts: () => store.posts.map(post => ({ title: post.title, slug: post.slug })),
+  post: ({ slug }) => {
+    const { title, file } = store.posts.find(s => s.slug === slug)
+    return readFileAsync(file).then(buf => {
+      const html = marked(buf.toString('utf-8'))
+      return { title, slug, html }
+    })
+  }
 }
 
 const gqlClient = new ApolloClient({
@@ -63,7 +76,7 @@ app.use(function (req, res) {
   const route = match[0]
   const { get, name } = route.handler
 
-  get(gqlClient).then(({ component, dependencies, data }) => {
+  get(gqlClient, route.params).then(({ component, dependencies, data }) => {
     const contents = renderToString(
       <App
         routes={routes}

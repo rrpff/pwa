@@ -17,7 +17,7 @@ const gqlClient = new ApolloClient({
   cache: new InMemoryCache()
 })
 
-getPage(gqlClient, manifest, window.initialComponentName).then(({ component, dependencies }) => {
+getPage(gqlClient, manifest, window.initialComponentName, window.initialParams).then(({ component, dependencies }) => {
   const tree =
     <App
       history={history}

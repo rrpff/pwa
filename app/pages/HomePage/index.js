@@ -10,8 +10,8 @@ export default class HomePage extends React.Component {
     return gqlClient.query({
       query: gql`
         {
-          superheroes {
-            name,
+          posts {
+            title,
             slug
           }
         }
@@ -21,14 +21,12 @@ export default class HomePage extends React.Component {
 
   render () {
     const { Sidebar } = this.props.dependencies
+    const { posts } = this.props.data
 
     return (
       <section>
-        <h1>Justice League</h1>
-        <img src="https://actionfigurecanada.files.wordpress.com/2009/08/alexrossjusticeleague.jpg" />
-
-        <h2>Justice League Members</h2>
-        <Sidebar superheroes={this.props.data.superheroes} />
+        <h1>Blog</h1>
+        <Sidebar posts={posts} />
       </section>
     )
   }
